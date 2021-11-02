@@ -18,21 +18,29 @@ export async function getServerSideProps(context) {
   }
   
 
-function Startseite(props){
+function Stickdateienverwaltung(props){
     //console.log(props.data);
-    var listitems = props.data.map(zeile => <li>{zeile.url}</li>)
-console.log(listitems);
+    var listitems = props.data.map(zeile => <Kachel sid={zeile.sid} autorurl={zeile.url} name={zeile.name}></Kachel>)
     return (
-        <ul>{listitems}</ul>
+        <div className="row justify-content-md-center">{listitems}</div>
     )
 }
 
-function ListItem(){
+function Kachel(props){
     return (
-        <li>
-            Name, Größe, Download
-        </li>
+        <div className="col col-lg-3">
+	    <div className="card">
+	    	<img className="card-img-top" src="images/{props.sid}.png">
+	    	<div className="card-body">
+	    		<div className="card-title">
+           			{props.name}
+	    		</div>
+	    	</div>
+	    </div>
+        </div>
     );
 }
 
-export default Startseite;
+
+
+export default Stickdateienverwaltung;

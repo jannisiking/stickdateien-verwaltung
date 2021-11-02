@@ -1,5 +1,5 @@
-import Link from "next/Link";
-import Head from "next/Head";
+import Link from "next/link";
+import Head from "next/head";
 import "../styles/globals.css";
 
 function MyApp({ Component, pageProps }) {
@@ -13,8 +13,8 @@ function MyApp({ Component, pageProps }) {
       </Head>
       <Navbar></Navbar>
       <Component {...pageProps} />
-      <script src="https://cdn.jsdelivr.net/npm/uikit@3.8.0/dist/js/uikit.min.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/uikit@3.8.0/dist/js/uikit-icons.min.js"></script>
+      <script async src="https://cdn.jsdelivr.net/npm/uikit@3.8.0/dist/js/uikit.min.js"></script>
+      <script async src="https://cdn.jsdelivr.net/npm/uikit@3.8.0/dist/js/uikit-icons.min.js"></script>
     </>
   );
 }
