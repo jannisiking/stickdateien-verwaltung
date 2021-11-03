@@ -1,0 +1,20 @@
+$primary: #C07DB4;
+$spacer: 1rem;
+$spacers: (
+  6: ($spacer * 5),
+    7: ($spacer * 20)
+    );
+
+    $mob-breakpoint: 768px;
+
+    $grid-breakpoints: (
+      xs: 0,
+        sm: 576px,
+	  md: 768px,
+	    lg: 992px,
+	      xl: $mob-breakpoint //Diesen Breakpoint werden wir als Kern-Umschaltpunkt der Website nehmen
+
+	      );
+
+	      $font-family-sans-serif: 'Raleway', sans-serif;
+@import 'node_modules/bootstrap/scss/bootstrap';
