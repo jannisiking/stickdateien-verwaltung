@@ -1,3 +1,4 @@
+import Image from "next/image";
 const mysql = require('mysql2/promise');
 var connection = mysql.createPool({
   host     : "85.214.52.49",
@@ -30,7 +31,10 @@ function Kachel(props){
     return (
         <div className="col col-lg-3">
 	    <div className="card">
-	    	<img className="card-img-top" src="images/{props.sid}.png">
+	    	<div className="image-wrapper">
+	    		<button className="btn">Button1</button>
+	    		<img className="stickdatei-image" src={"/images/"+props.sid+".png"} width="400" height="400"/>
+	    	</div>
 	    	<div className="card-body">
 	    		<div className="card-title">
            			{props.name}

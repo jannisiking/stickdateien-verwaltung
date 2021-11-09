@@ -8644,5 +8644,19 @@ textarea.form-control-lg {
     display: none !important;
   }
 }
+.stickdatei-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.image-wrapper .btn {
+  position: relative;
+  display: none;
+}
+
+.image-wrapper:hover .btn, .image-wrapper .btn:hover {
+  display: inline;
+}
 
 /*# sourceMappingURL=globals.css.map */

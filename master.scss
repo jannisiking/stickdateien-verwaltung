@@ -18,3 +18,18 @@ $spacers: (
 
 	      $font-family-sans-serif: 'Raleway', sans-serif;
 @import 'node_modules/bootstrap/scss/bootstrap';
+
+.stickdatei-image{
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.image-wrapper .btn{
+	position: relative;
+	display: none;
+}
+
+.image-wrapper:hover .btn, .image-wrapper .btn:hover{
+	display: inline;	
+};
