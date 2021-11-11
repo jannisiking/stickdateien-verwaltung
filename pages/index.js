@@ -23,20 +23,20 @@ function Stickdateienverwaltung(props){
     //console.log(props.data);
     var listitems = props.data.map(zeile => <Kachel sid={zeile.sid} autorurl={zeile.url} name={zeile.name}></Kachel>)
     return (
-        <div className="row justify-content-md-center">{listitems}</div>
+        <div className="">{listitems}</div>
     )
 }
 
 function Kachel(props){
     return (
-        <div className="col col-lg-3">
-	    <div className="card">
-	    	<div className="image-wrapper">
-	    		<button className="btn">Button1</button>
-	    		<img className="stickdatei-image" src={"/images/"+props.sid+".png"} width="400" height="400"/>
+        <div className="">
+	    <div className="">
+	    	<div className="">
+	    		<button className="">Button1</button>
+	    		<img className="" src={"/images/"+props.sid+".png"} width="400" height="400"/>
 	    	</div>
-	    	<div className="card-body">
-	    		<div className="card-title">
+	    	<div className="">
+	    		<div className="">
            			{props.name}
 	    		</div>
 	    	</div>
