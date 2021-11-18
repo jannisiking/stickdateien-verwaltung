@@ -68,7 +68,7 @@ function Kachel(props) {
 
 function Sidebar(props) {
   return (
-    <div className="flex-none h-full w-80 p-5 bg-gradient-to-r from-blue-300 bg-sky-50">
+    <div className="flex-none h-full w-80 p-5 bg-tertiary">
       <form className="my-5">
         <input type="text" className="rounded-md text-xl" />
         <button
@@ -90,6 +90,8 @@ function Sidebar(props) {
     </div>
   );
 }
+
+
 
 function Farbfeld(props) {
   return <div className={props.tailwindfarbe + " h-10 my-1 rounded-xl"}></div>;
