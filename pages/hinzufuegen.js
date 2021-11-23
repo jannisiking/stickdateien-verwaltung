@@ -6,10 +6,13 @@ class Hinzufuegen extends React.Component {
     super(props);
     this.dataToRoot = this.dataToRoot.bind(this);
     this.getunsortedfilenames = this.getunsortedfilenames.bind(this);
+    this.setCurrentEditingGroup = this.setCurrentEditingGroup.bind(this);
     this.state = {
       sortedgroups: [], //ein Array an Gruppen-Objekten. diese Objekte enthalten die Metadaten plus ein Array der eigentlichen Dateien
       unsortedfiles: [], //beninhaltet die Dateien in der linken Spalte, die noch nicht zugeordnet sind
-      unsortedfilenames: []
+      unsortedfilenames: [],
+      gidcount: 0,
+      currenteditinggroup: 0,
     };
   }
   //Folgende Funktion wird beim einfügen neuer Dateien ausgeführt
@@ -31,7 +34,9 @@ class Hinzufuegen extends React.Component {
     let unsortedfilestemp = this.state.unsortedfiles;
     let sortedgroupstemp = this.state.sortedgroups;
     unsortedfilestemp = unsortedfilestemp.concat(newdata);
+
     //Dateien in Gruppen einordnen
+
     unsortedfilestemp.forEach((unsortedfileobject, i) => {
       let hinzugefuegt = false;
       sortedgroupstemp.forEach((group) => {
@@ -63,37 +68,31 @@ class Hinzufuegen extends React.Component {
       }
     });
 
+    //die einsortierten Dateien aus der unsortierten Liste herausnehmen:
+
     unsortedfilestemp = unsortedfilestemp.filter(
       (file) => !einsortiert.includes(file)
     );
 
+    //neue Gruppen aus den nicht einsortierbaren Dateien bilden
+    let tempgidcount = this.state.gidcount; //Da hier die Gruppen erstellt werden, muss die GID auch hier hochgezählt werden (Gruppen - ID)
     let arrayofnewgroups = [];
     for (let x = unsortedfilestemp.length - 1; x >= 0; x--) {
-      console.log("x ist: "+x);
       if (typeof unsortedfilestemp[x] != "undefined") {
-        //console.log(unsortedfilestemp);
-        //console.log("Name und voller Name der zu checkenden Datei:");
-        let filename=unsortedfilestemp[x].name;
-        let filefullname=unsortedfilestemp[x].fullname;
-        console.log(filename, filefullname);
-        let tempnewgroupfiles = unsortedfilestemp.filter(function(file){
-          let result= false;
-          //console.log(file.name);
-          //console.log(unsortedfilestemp[x].name);
-          //console.log( file.fullname);
-          //console.log(unsortedfilestemp[x].fullname);
-          if(file.name == filename &&
-            file.fullname != filefullname){
-              result=true;
-              //console.log("Ist gleich");
-            }
-            return result;
+        let filename = unsortedfilestemp[x].name;
+        let filefullname = unsortedfilestemp[x].fullname;
+        let tempnewgroupfiles = unsortedfilestemp.filter(function (file) {
+          let result = false;
+          if (file.name == filename && file.fullname != filefullname) {
+            result = true;
+          }
+          return result;
         });
-        //console.log(tempnewgroupfiles);
         if (tempnewgroupfiles.length != 0 && tempnewgroupfiles != "undefined") {
-            tempnewgroupfiles.push(unsortedfilestemp[x]);
-            //console.log("Hier komme ich rein");
+          tempnewgroupfiles.push(unsortedfilestemp[x]);
+          tempgidcount++;
           arrayofnewgroups.push({
+            gid: tempgidcount,
             name: tempnewgroupfiles[0].name,
             files: tempnewgroupfiles,
           });
@@ -101,26 +100,23 @@ class Hinzufuegen extends React.Component {
         unsortedfilestemp = unsortedfilestemp.filter(
           (file) => !tempnewgroupfiles.includes(file)
         );
-        console.log(unsortedfilestemp);
       }
     }
-    console.log(arrayofnewgroups);
-    console.log(unsortedfilestemp);
     this.setState({
+      gidcount: tempgidcount,
       sortedgroups: this.state.sortedgroups.concat(arrayofnewgroups),
       unsortedfiles: unsortedfilestemp,
     });
   }
 
-  getunsortedfilenames(){
-    return this.state.unsortedfiles.map(file => file.fullname);
+  getunsortedfilenames() {
+    return this.state.unsortedfiles.map((file) => file.fullname);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot){
-    console.log(this.state.unsortedfiles);
-    console.log(this.state.sortedgroups);
+  setCurrentEditingGroup(pGid) {
+    console.log("Klick!", pGid);
+    this.setState({ currenteditinggroup: pGid });
   }
-
 
   render() {
     //console.log("Root", this.state.sortedgroups);
@@ -130,7 +126,13 @@ class Hinzufuegen extends React.Component {
           dataToRoot={this.dataToRoot}
           filenamearray={this.getunsortedfilenames()}
         />
-        <RechteSeite sortedgroups={this.state.sortedgroups} />
+        <RechteSeite
+          sortedgroups={this.state.sortedgroups}
+          setCurrentEditingGroup={this.setCurrentEditingGroup}
+          currentEditingGroup={
+            this.state.sortedgroups[this.state.currenteditinggroup]
+          }
+        />
       </div>
     );
   }
@@ -156,12 +158,21 @@ class FileInput extends React.Component {
   constructor(props) {
     super(props);
     this.inputRef = React.createRef();
-    this.file_Handler = this.file_Handler.bind(this);
+    this.file_Handler_input = this.file_Handler_input.bind(this);
+    this.file_Handler_drop = this.file_Handler_drop.bind(this);
     this.state = { filenamearray: [] };
   }
-  file_Handler(e) {
+  file_Handler_input(e) {
+    console.log("INPUT", e);
     e.preventDefault();
     var filearray = Object.values(this.inputRef.current.files);
+    this.props.dataToRoot(filearray);
+  }
+
+  file_Handler_drop(e) {
+    console.log("DROP", e);
+    e.preventDefault();
+    var filearray = Object.values(e.dataTransfer.files);
     this.props.dataToRoot(filearray);
   }
 
@@ -175,8 +186,8 @@ class FileInput extends React.Component {
           <input
             className="w-full h-full"
             type="file"
-            onInput={this.file_Handler}
-            onDrop={this.file_Handler}
+            onInput={this.file_Handler_input}
+            onDrop={this.file_Handler_drop}
             ref={this.inputRef}
             multiple
           ></input>
@@ -221,8 +232,13 @@ class RechteSeite extends Component {
     //console.log("RechteSeite", this.props.sortedgroups);
     return (
       <div className="h-full flex-1 flex flex-col">
-        <ParameterBearbeiten></ParameterBearbeiten>
-        <GruppenListe sortedgroups={this.props.sortedgroups}/>
+        <ParameterBearbeiten
+          currentEditingGroup={this.props.currentEditingGroup}
+        />
+        <GruppenListe
+          sortedgroups={this.props.sortedgroups}
+          setCurrentEditingGroup={this.props.setCurrentEditingGroup}
+        />
       </div>
     );
   }
@@ -231,10 +247,65 @@ class RechteSeite extends Component {
 class ParameterBearbeiten extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      name: "",
+      autor: "",
+      url: "",
+    };
   }
 
-  render() {
-    return <div className="h-60 flex-none bg-gray-300"></div>;
+  // componentDidUpdate(prevProps) {
+  //   // Typical usage (don't forget to compare props):
+  //   if (
+  //     this.props.currentEditingGroup &&
+  //     this.props.currentEditingGroup.gip !== prevProps.currentEditingGroup.gip
+  //   ) {
+  //     this.setState({
+  //       name: this.props.currentEditingGroup.name,
+  //       autor: this.props.currentEditingGroup.autor,
+  //       url: this.props.currentEditingGroup.url,
+  //     });
+  //   }
+  // }
+
+  render(props) {
+    return (
+      <div className="h-80 flex-none flex p-5 bg-gray-300">
+        <div className="relative h-full w-80 bg-white rounded-xl"></div>
+        <div className="flex-1  mx-2 text-white text-2xl flex-col justify-between">
+          <form className="w-full">
+            <div className="flex">
+              <div className="flex-none w-20">Name</div>
+              <input
+                className="text-black rounded-xl p-2 my-2 bg-white"
+                defaultValue={this.state.name}
+              />
+            </div>
+            <div className="flex">
+              <div className="flex-none w-20">Autor</div>
+              <input
+                className="text-black rounded-xl p-2 my-2 bg-white"
+                defaultValue={this.state.autor}
+              />
+            </div>
+            <div className="flex">
+              <div className="flex-none w-20">URL</div>
+              <input
+                className="text-black rounded-xl p-2 my-2 bg-white"
+                defaultValue={this.state.url}
+              />
+            </div>
+            <div className="flex">
+              <div className="flex-none w-20">Tags</div>
+              <input className="text-black rounded-xl p-2 my-2 bg-white" />
+            </div>
+          </form>
+        </div>
+        <div className="flex-none w-20">
+          <button className="btn bg-green-500">Speichern</button>
+        </div>
+      </div>
+    );
   }
 }
 
@@ -245,15 +316,17 @@ class GruppenListe extends Component {
 
   render(props) {
     //console.log("Gruppenliste", this.props.sortedgroups);
-    let dateigruppen = this.props.sortedgroups.map((group)=> {
-        return(<DateiGruppe key={group.name}
-          name={group.name}
-        ></DateiGruppe>)
-    })
+    let dateigruppen = this.props.sortedgroups.map((group) => {
+      return (
+        <DateiGruppe
+          key={group.name}
+          groupobject={group}
+          setCurrentEditingGroup={this.props.setCurrentEditingGroup}
+        ></DateiGruppe>
+      );
+    });
     return (
-      <div className=" flex-grow p-10 overflow-y-scroll">
-        {dateigruppen}
-      </div>
+      <div className=" flex-grow p-10 overflow-y-scroll">{dateigruppen}</div>
     );
   }
 }
@@ -264,11 +337,26 @@ class DateiGruppe extends Component {
   }
 
   render() {
+    let filenames = this.props.groupobject.files.map((file) => (
+      <div className="bg-black text-white p-3 w-full rounded-xl my-2">
+        {file.fullname}
+      </div>
+    ));
     return (
-      <div className=" h-60 flex-grow bg-gray-400 shadow-lg transition-all duration-200 my-5 hover:shadow-2xl rounded-md p-5">
-        <div className="relative h-full w-1/3 ml-3">
-          {this.props.name}
+      <div
+        className=" h-60 flex-grow bg-gray-400 shadow-lg transition-all duration-200 my-5 hover:shadow-2xl rounded-md p-5 flex justify-between"
+        onClick={() =>
+          this.props.setCurrentEditingGroup(this.props.groupobject.gid)
+        }
+      >
+        <div className="relative h-full w-80 bg-white rounded-xl"></div>
+        <div className="w-1/3 mx-2 text-white text-2xl flex flex-col justify-between">
+          <div>Name: {this.props.groupobject.name}</div>
+          <div>Autor: </div>
+          <div>URL: </div>
+          <div>Tags: </div>
         </div>
+        <div className="w-1/3 overflow-y-scroll">{filenames}</div>
       </div>
     );
   }
