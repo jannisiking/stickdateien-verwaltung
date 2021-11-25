@@ -10,7 +10,7 @@ class Hinzufuegen extends React.Component {
       sortedgroups: [], //ein Array an Gruppen-Objekten. diese Objekte enthalten die Metadaten plus ein Array der eigentlichen Dateien
       unsortedfiles: [], //beninhaltet die Dateien in der linken Spalte, die noch nicht zugeordnet sind
       unsortedfilenames: [],
-      gidcount: 0
+      gidcount: 0,
     };
   }
   //Folgende Funktion wird beim einfügen neuer Dateien ausgeführt
@@ -110,7 +110,6 @@ class Hinzufuegen extends React.Component {
   getunsortedfilenames() {
     return this.state.unsortedfiles.map((file) => file.fullname);
   }
-
 
   render() {
     //console.log("Root", this.state.sortedgroups);
@@ -232,8 +231,6 @@ class RechteSeite extends Component {
   }
 }
 
-
-
 class GruppenListe extends Component {
   constructor(props) {
     super(props);
@@ -268,18 +265,27 @@ class DateiGruppe extends Component {
       </div>
     ));
     return (
-      <div
-        className=" h-60 flex-grow bg-gray-400 shadow-lg transition-all duration-200 my-5 hover:shadow-2xl rounded-md p-5 flex justify-between"
-        onClick={() =>
-          this.props.setCurrentEditingGroup(this.props.groupobject.gid)
-        }
-      >
+      <div className=" h-80 flex-grow bg-gray-400 shadow-lg transition-all duration-200 my-5 hover:shadow-2xl rounded-md p-5 flex justify-between">
         <div className="relative h-full w-80 bg-white rounded-xl"></div>
         <div className="w-1/3 mx-2 text-white text-2xl flex flex-col justify-between">
-          <div>Name: {this.props.groupobject.name}</div>
-          <div>Autor: </div>
-          <div>URL: </div>
-          <div>Tags: </div>
+          <div className="my-2 flex flex-nowrap">
+            <div className="border-4 border-gray-500 rounded-tl-xl rounded-bl-xl w-32">
+              Name
+            </div>
+            <input className="border-4 border-l-0 border-gray-500 rounded-tr-xl rounded-br-xl w-full text-gray-400" defaultValue={this.props.groupobject.name}/>
+          </div>
+          <div className="my-2 flex-1 flex flex-nowrap">
+            <div className="border-4 border-gray-500 rounded-tl-xl rounded-bl-xl leading-tight px-2 w-32">
+              Tags
+            </div>
+            <textarea className="border-4 border-l-0 border-gray-500 rounded-tr-xl rounded-br-xl w-full text-gray-400 resize-none"/>
+          </div>
+          <div className="my-2 flex-1 flex flex-nowrap">
+            <div className="border-4 border-gray-500 rounded-tl-xl rounded-bl-xl leading-tight px-2 w-32">
+              Farben
+            </div>
+            <textarea className="border-4 border-l-0 border-gray-500 rounded-tr-xl rounded-br-xl w-full text-gray-400 resize-none"/>
+          </div>
         </div>
         <div className="w-1/3 overflow-y-scroll">{filenames}</div>
       </div>
@@ -288,3 +294,18 @@ class DateiGruppe extends Component {
 }
 
 export default Hinzufuegen;
+
+// <form>
+//           <label> Name:
+//           <input defaultValue={this.props.groupobject.name}/>
+//           </label>
+//           <label> Name:
+//           <input defaultValue={this.props.groupobject.name}/>
+//           </label>
+//           <label> Name:
+//           <input defaultValue={this.props.groupobject.name}/>
+//           </label>
+//           <label> Name:
+//           <input defaultValue={this.props.groupobject.name}/>
+//           </label>
+//           </form>
