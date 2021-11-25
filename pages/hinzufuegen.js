@@ -6,13 +6,11 @@ class Hinzufuegen extends React.Component {
     super(props);
     this.dataToRoot = this.dataToRoot.bind(this);
     this.getunsortedfilenames = this.getunsortedfilenames.bind(this);
-    this.setCurrentEditingGroup = this.setCurrentEditingGroup.bind(this);
     this.state = {
       sortedgroups: [], //ein Array an Gruppen-Objekten. diese Objekte enthalten die Metadaten plus ein Array der eigentlichen Dateien
       unsortedfiles: [], //beninhaltet die Dateien in der linken Spalte, die noch nicht zugeordnet sind
       unsortedfilenames: [],
-      gidcount: 0,
-      currenteditinggroup: 0,
+      gidcount: 0
     };
   }
   //Folgende Funktion wird beim einfügen neuer Dateien ausgeführt
@@ -113,10 +111,6 @@ class Hinzufuegen extends React.Component {
     return this.state.unsortedfiles.map((file) => file.fullname);
   }
 
-  setCurrentEditingGroup(pGid) {
-    console.log("Klick!", pGid);
-    this.setState({ currenteditinggroup: pGid });
-  }
 
   render() {
     //console.log("Root", this.state.sortedgroups);
@@ -129,9 +123,6 @@ class Hinzufuegen extends React.Component {
         <RechteSeite
           sortedgroups={this.state.sortedgroups}
           setCurrentEditingGroup={this.setCurrentEditingGroup}
-          currentEditingGroup={
-            this.state.sortedgroups[this.state.currenteditinggroup]
-          }
         />
       </div>
     );
@@ -232,9 +223,6 @@ class RechteSeite extends Component {
     //console.log("RechteSeite", this.props.sortedgroups);
     return (
       <div className="h-full flex-1 flex flex-col">
-        <ParameterBearbeiten
-          currentEditingGroup={this.props.currentEditingGroup}
-        />
         <GruppenListe
           sortedgroups={this.props.sortedgroups}
           setCurrentEditingGroup={this.props.setCurrentEditingGroup}
@@ -244,70 +232,7 @@ class RechteSeite extends Component {
   }
 }
 
-class ParameterBearbeiten extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      name: "",
-      autor: "",
-      url: "",
-    };
-  }
 
-  // componentDidUpdate(prevProps) {
-  //   // Typical usage (don't forget to compare props):
-  //   if (
-  //     this.props.currentEditingGroup &&
-  //     this.props.currentEditingGroup.gip !== prevProps.currentEditingGroup.gip
-  //   ) {
-  //     this.setState({
-  //       name: this.props.currentEditingGroup.name,
-  //       autor: this.props.currentEditingGroup.autor,
-  //       url: this.props.currentEditingGroup.url,
-  //     });
-  //   }
-  // }
-
-  render(props) {
-    return (
-      <div className="h-80 flex-none flex p-5 bg-gray-300">
-        <div className="relative h-full w-80 bg-white rounded-xl"></div>
-        <div className="flex-1  mx-2 text-white text-2xl flex-col justify-between">
-          <form className="w-full">
-            <div className="flex">
-              <div className="flex-none w-20">Name</div>
-              <input
-                className="text-black rounded-xl p-2 my-2 bg-white"
-                defaultValue={this.state.name}
-              />
-            </div>
-            <div className="flex">
-              <div className="flex-none w-20">Autor</div>
-              <input
-                className="text-black rounded-xl p-2 my-2 bg-white"
-                defaultValue={this.state.autor}
-              />
-            </div>
-            <div className="flex">
-              <div className="flex-none w-20">URL</div>
-              <input
-                className="text-black rounded-xl p-2 my-2 bg-white"
-                defaultValue={this.state.url}
-              />
-            </div>
-            <div className="flex">
-              <div className="flex-none w-20">Tags</div>
-              <input className="text-black rounded-xl p-2 my-2 bg-white" />
-            </div>
-          </form>
-        </div>
-        <div className="flex-none w-20">
-          <button className="btn bg-green-500">Speichern</button>
-        </div>
-      </div>
-    );
-  }
-}
 
 class GruppenListe extends Component {
   constructor(props) {
