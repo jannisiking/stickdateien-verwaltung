@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import Image from "next/image";
+import {convert} from "../pestopng";
 
 class Hinzufuegen extends React.Component {
   constructor(props) {
     super(props);
     this.dataToRoot = this.dataToRoot.bind(this);
     this.getunsortedfilenames = this.getunsortedfilenames.bind(this);
+    this.initialImageFromPes = this.initialImageFromPes.bind(this);
     this.state = {
       sortedgroups: [], //ein Array an Gruppen-Objekten. diese Objekte enthalten die Metadaten plus ein Array der eigentlichen Dateien
       unsortedfiles: [], //beninhaltet die Dateien in der linken Spalte, die noch nicht zugeordnet sind
@@ -15,7 +17,7 @@ class Hinzufuegen extends React.Component {
   }
   //Folgende Funktion wird beim einfügen neuer Dateien ausgeführt
   //ZIEL: Neue Dateien einsortieren in gruppen und unsortiert
-  dataToRoot(data) {
+  async dataToRoot(data) {
     let newdata = data.map((file) => {
       let fileendung = file.name.split(".").reverse()[0];
       let temp = file.name.split(".");
@@ -93,6 +95,7 @@ class Hinzufuegen extends React.Component {
             gid: tempgidcount,
             name: tempnewgroupfiles[0].name,
             files: tempnewgroupfiles,
+            image: await this.initialImageFromPes(tempnewgroupfiles)
           });
         }
         unsortedfilestemp = unsortedfilestemp.filter(
@@ -107,12 +110,28 @@ class Hinzufuegen extends React.Component {
     });
   }
 
+
+  //Nimmt alle Dateien einer neuen Gruppe und wenn ein PES File drin ist, wird ein Bild erzeugt. Wenn nicht, gibt sie null zurück.
+  async initialImageFromPes(pGroupFiles){
+    let pesfile = null;
+    let output = null;
+    pGroupFiles.forEach((file)=>{
+      if(file.ending=="pes"||file.ending=="PES"||file.ending=="Pes"){
+        pesfile = file.file;
+      }
+    })
+    if(pesfile!=null){
+      output = await convert(pesfile);
+    }
+    return await output;
+  }
+
   getunsortedfilenames() {
     return this.state.unsortedfiles.map((file) => file.fullname);
   }
 
   render() {
-    //console.log("Root", this.state.sortedgroups);
+    console.log(this.state.sortedgroups);
     return (
       <div className="flex w-full h-full">
         <LinkeSeite
@@ -256,9 +275,23 @@ class GruppenListe extends Component {
 class DateiGruppe extends Component {
   constructor(props) {
     super(props);
+    this.imageRef = React.createRef();
+    this.readeronload = this.readeronload.bind(this);
   }
 
+  readeronload(e){
+    this.imageRef.current.setAttribute("src", e.target.result);
+  }
+
+
   render() {
+    if(this.props.groupobject.image!=null){
+      let reader = new FileReader();
+    reader.onload=this.readeronload;
+    reader.readAsDataURL(this.props.groupobject.image);
+    }
+    
+
     let filenames = this.props.groupobject.files.map((file) => (
       <div className="bg-black text-white p-3 w-full rounded-xl my-2">
         {file.fullname}
@@ -266,7 +299,9 @@ class DateiGruppe extends Component {
     ));
     return (
       <div className=" h-80 flex-grow bg-gray-400 shadow-lg transition-all duration-200 my-5 hover:shadow-2xl rounded-md p-5 flex justify-between">
-        <div className="relative h-full w-80 bg-white rounded-xl"></div>
+        <div className="relative h-full w-80 bg-white rounded-xl">
+          <img src="" alt="" ref={this.imageRef}/>
+        </div>
         <div className="w-1/3 mx-2 text-white text-2xl flex flex-col justify-between">
           <div className="my-2 flex flex-nowrap">
             <div className="border-4 border-gray-500 rounded-tl-xl rounded-bl-xl w-32">
@@ -295,17 +330,3 @@ class DateiGruppe extends Component {
 
 export default Hinzufuegen;
 
-// <form>
-//           <label> Name:
-//           <input defaultValue={this.props.groupobject.name}/>
-//           </label>
-//           <label> Name:
-//           <input defaultValue={this.props.groupobject.name}/>
-//           </label>
-//           <label> Name:
-//           <input defaultValue={this.props.groupobject.name}/>
-//           </label>
-//           <label> Name:
-//           <input defaultValue={this.props.groupobject.name}/>
-//           </label>
-//           </form>
