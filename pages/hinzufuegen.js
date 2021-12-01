@@ -313,14 +313,15 @@ class DateiGruppe extends Component {
     ));
     return (
       <div className=" h-80 flex-grow bg-gray-400 shadow-lg transition-all duration-200 my-5 hover:shadow-2xl rounded-md p-5 flex justify-between">
-        <button
+        
+        <div className="relative h-full w-80 bg-white rounded-xl">
+        <button className="absolute rounded-md bg-black m-2"
           onClick={() => this.props.turnimage(this.props.groupobject.gid)}
         >
-          Drehen
+        <object data="/svg/turn.svg" type="image/svg+xml" className="w-5 h-5 m-2 pointer-events-none cursor-pointer"></object>
         </button>
-        <div className="relative h-full w-80 bg-white rounded-xl">
           <img
-            class="object-contain w-full h-full"
+            className="object-contain w-full h-full"
             src={
               this.props.groupobject.imagecanvas != null
                 ? this.props.groupobject.imagecanvas.canvas.toDataURL()
