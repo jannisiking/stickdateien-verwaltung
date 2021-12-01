@@ -1,13 +1,14 @@
 import React, { Component } from "react";
 import Image from "next/image";
-import {convert} from "../pestopng";
+import { convert } from "../pestopng";
 
 class Hinzufuegen extends React.Component {
   constructor(props) {
     super(props);
     this.dataToRoot = this.dataToRoot.bind(this);
     this.getunsortedfilenames = this.getunsortedfilenames.bind(this);
-    this.initialImageFromPes = this.initialImageFromPes.bind(this);
+    this.initialCanvasFromPes = this.initialCanvasFromPes.bind(this);
+    this.turnimage = this.turnimage.bind(this);
     this.state = {
       sortedgroups: [], //ein Array an Gruppen-Objekten. diese Objekte enthalten die Metadaten plus ein Array der eigentlichen Dateien
       unsortedfiles: [], //beninhaltet die Dateien in der linken Spalte, die noch nicht zugeordnet sind
@@ -95,7 +96,7 @@ class Hinzufuegen extends React.Component {
             gid: tempgidcount,
             name: tempnewgroupfiles[0].name,
             files: tempnewgroupfiles,
-            image: await this.initialImageFromPes(tempnewgroupfiles)
+            imagecanvas: await this.initialCanvasFromPes(tempnewgroupfiles),
           });
         }
         unsortedfilestemp = unsortedfilestemp.filter(
@@ -110,24 +111,47 @@ class Hinzufuegen extends React.Component {
     });
   }
 
-
-  //Nimmt alle Dateien einer neuen Gruppe und wenn ein PES File drin ist, wird ein Bild erzeugt. Wenn nicht, gibt sie null zurück.
-  async initialImageFromPes(pGroupFiles){
+  //Nimmt alle Dateien einer neuen Gruppe und wenn ein PES File drin ist, wird ein CANVAS erzeugt. Wenn nicht, gibt sie null zurück.
+  async initialCanvasFromPes(pGroupFiles) {
     let pesfile = null;
-    let output = null;
-    pGroupFiles.forEach((file)=>{
-      if(file.ending=="pes"||file.ending=="PES"||file.ending=="Pes"){
+    pGroupFiles.forEach((file) => {
+      if (
+        file.ending == "pes" ||
+        file.ending == "PES" ||
+        file.ending == "Pes"
+      ) {
         pesfile = file.file;
       }
-    })
-    if(pesfile!=null){
-      output = await convert(pesfile);
-    }
-    return await output;
+    });
+    if (pesfile == null) return;
+    return await convert(pesfile);
   }
 
   getunsortedfilenames() {
     return this.state.unsortedfiles.map((file) => file.fullname);
+  }
+
+
+  turnimage(pGid) {
+    
+    let tempgrouplist = this.state.sortedgroups;
+    let index = tempgrouplist.findIndex(group => group.gid==pGid);
+    if(index==null) return;
+    let ctx = tempgrouplist[index].imagecanvas;
+    console.log(ctx.canvas.toDataURL());
+    var tempImage = document.createElement("img");
+    tempImage.src = ctx.canvas.toDataURL();
+    // let tempdata = ctx.getImageData(0,0,ctx.canvas.width,ctx.canvas.height);
+     ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+     ctx.save();
+     ctx.translate(ctx.canvas.width/2, ctx.canvas.height/2);
+     ctx.rotate(Math.PI / 2);
+     ctx.translate(-ctx.canvas.width/2, -ctx.canvas.height/2);
+     ctx.drawImage(tempImage,0,0);
+     ctx.restore();
+    // console.log("Hier bin ich drin");
+    // console.log(index, ctx, tempgrouplist)
+     this.setState({sortedgroups: tempgrouplist});
   }
 
   render() {
@@ -139,6 +163,7 @@ class Hinzufuegen extends React.Component {
           filenamearray={this.getunsortedfilenames()}
         />
         <RechteSeite
+          turnimage={this.turnimage}
           sortedgroups={this.state.sortedgroups}
           setCurrentEditingGroup={this.setCurrentEditingGroup}
         />
@@ -243,6 +268,7 @@ class RechteSeite extends Component {
       <div className="h-full flex-1 flex flex-col">
         <GruppenListe
           sortedgroups={this.props.sortedgroups}
+          turnimage={this.props.turnimage}
           setCurrentEditingGroup={this.props.setCurrentEditingGroup}
         />
       </div>
@@ -262,6 +288,7 @@ class GruppenListe extends Component {
         <DateiGruppe
           key={group.name}
           groupobject={group}
+          turnimage={this.props.turnimage}
           setCurrentEditingGroup={this.props.setCurrentEditingGroup}
         ></DateiGruppe>
       );
@@ -276,22 +303,9 @@ class DateiGruppe extends Component {
   constructor(props) {
     super(props);
     this.imageRef = React.createRef();
-    this.readeronload = this.readeronload.bind(this);
   }
-
-  readeronload(e){
-    this.imageRef.current.setAttribute("src", e.target.result);
-  }
-
 
   render() {
-    if(this.props.groupobject.image!=null){
-      let reader = new FileReader();
-    reader.onload=this.readeronload;
-    reader.readAsDataURL(this.props.groupobject.image);
-    }
-    
-
     let filenames = this.props.groupobject.files.map((file) => (
       <div className="bg-black text-white p-3 w-full rounded-xl my-2">
         {file.fullname}
@@ -299,27 +313,43 @@ class DateiGruppe extends Component {
     ));
     return (
       <div className=" h-80 flex-grow bg-gray-400 shadow-lg transition-all duration-200 my-5 hover:shadow-2xl rounded-md p-5 flex justify-between">
+        <button
+          onClick={() => this.props.turnimage(this.props.groupobject.gid)}
+        >
+          Drehen
+        </button>
         <div className="relative h-full w-80 bg-white rounded-xl">
-          <img src="" alt="" ref={this.imageRef}/>
+          <img
+            class="object-contain w-full h-full"
+            src={
+              this.props.groupobject.imagecanvas != null
+                ? this.props.groupobject.imagecanvas.canvas.toDataURL()
+                : ""
+            }
+            alt=""
+          />
         </div>
         <div className="w-1/3 mx-2 text-white text-2xl flex flex-col justify-between">
           <div className="my-2 flex flex-nowrap">
             <div className="border-4 border-gray-500 rounded-tl-xl rounded-bl-xl w-32">
               Name
             </div>
-            <input className="border-4 border-l-0 border-gray-500 rounded-tr-xl rounded-br-xl w-full text-gray-400" defaultValue={this.props.groupobject.name}/>
+            <input
+              className="border-4 border-l-0 border-gray-500 rounded-tr-xl rounded-br-xl w-full text-gray-400"
+              defaultValue={this.props.groupobject.name}
+            />
           </div>
           <div className="my-2 flex-1 flex flex-nowrap">
             <div className="border-4 border-gray-500 rounded-tl-xl rounded-bl-xl leading-tight px-2 w-32">
               Tags
             </div>
-            <textarea className="border-4 border-l-0 border-gray-500 rounded-tr-xl rounded-br-xl w-full text-gray-400 resize-none"/>
+            <textarea className="border-4 border-l-0 border-gray-500 rounded-tr-xl rounded-br-xl w-full text-gray-400 resize-none" />
           </div>
           <div className="my-2 flex-1 flex flex-nowrap">
             <div className="border-4 border-gray-500 rounded-tl-xl rounded-bl-xl leading-tight px-2 w-32">
               Farben
             </div>
-            <textarea className="border-4 border-l-0 border-gray-500 rounded-tr-xl rounded-br-xl w-full text-gray-400 resize-none"/>
+            <textarea className="border-4 border-l-0 border-gray-500 rounded-tr-xl rounded-br-xl w-full text-gray-400 resize-none" />
           </div>
         </div>
         <div className="w-1/3 overflow-y-scroll">{filenames}</div>
@@ -329,4 +359,3 @@ class DateiGruppe extends Component {
 }
 
 export default Hinzufuegen;
-
