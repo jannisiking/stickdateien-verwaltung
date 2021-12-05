@@ -6,25 +6,29 @@ class Hinzufuegen extends React.Component {
   constructor(props) {
     super(props);
     this.dataToRoot = this.dataToRoot.bind(this);
-    this.getunsortedfilenames = this.getunsortedfilenames.bind(this);
     this.initialCanvasFromPes = this.initialCanvasFromPes.bind(this);
     this.turnimage = this.turnimage.bind(this);
+    this.dropFile = this.dropFile.bind(this);
     this.state = {
       sortedgroups: [], //ein Array an Gruppen-Objekten. diese Objekte enthalten die Metadaten plus ein Array der eigentlichen Dateien
       unsortedfiles: [], //beninhaltet die Dateien in der linken Spalte, die noch nicht zugeordnet sind
       unsortedfilenames: [],
       gidcount: 0,
+      filecount: 0
     };
   }
   //Folgende Funktion wird beim einfügen neuer Dateien ausgeführt
   //ZIEL: Neue Dateien einsortieren in gruppen und unsortiert
   async dataToRoot(data) {
+    let tempfilecount = this.state.filecount;
     let newdata = data.map((file) => {
+      tempfilecount++;
       let fileendung = file.name.split(".").reverse()[0];
       let temp = file.name.split(".");
       temp.pop();
       let filename = temp.join("");
       return {
+        fid: tempfilecount,
         fullname: file.name,
         name: filename,
         ending: fileendung,
@@ -106,9 +110,51 @@ class Hinzufuegen extends React.Component {
     }
     this.setState({
       gidcount: tempgidcount,
+      filecount: tempfilecount,
       sortedgroups: this.state.sortedgroups.concat(arrayofnewgroups),
       unsortedfiles: unsortedfilestemp,
     });
+  }
+
+  dropFile(pFid, pSrcGid, pDestGid){
+    let tempsortedgroups=this.state.sortedgroups;
+    let tempunsortedfiles=this.state.unsortedfiles;
+    if(pSrcGid==pDestGid) return;
+    if(pSrcGid==0){ //Von unsortiert in eine Gruppe
+      let tempfile = tempunsortedfiles.filter((file)=> file.fid==pFid)[0];  //Datei-objekt heraussuchen
+      tempunsortedfiles= tempunsortedfiles.filter((file)=> file.fid!=pFid); //Datei-objekt aus unsortierten Dateien löschen
+      tempsortedgroups.forEach((group)=>{
+        if(group.gid==pDestGid){//Passende Zielgruppe finden
+          group.files.push(tempfile); //Wenn Zielgruppe gefunden, dann Datei an Files-Array der Gruppe anhängen
+        }
+      })
+    } else if(pDestGid==0){ //von Gruppe nach unsortiert
+      let tempfile = tempsortedgroups.filter((group)=>group.gid==pSrcGid)[0].files.filter((file)=>file.fid==pFid)[0]; //Datei-Objekt aus dieser Gruppe extrahieren
+      tempsortedgroups.forEach((group)=>{
+        if(group.gid==pSrcGid){
+          group.files = group.files.filter((pFile)=>pFile.fid!=pFid);//Datei-Objekt aus ursprungsgruppe entnehmen, indem nach allen Dateien ausser eben dieser gefiltert wird
+        }
+      })
+      tempunsortedfiles.push(tempfile);
+    }else{ //von gruppe zu anderer Gruppe
+      let tempfile = tempsortedgroups.filter((group)=>group.gid==pSrcGid)[0].files.filter((file)=>file.fid==pFid)[0];
+
+      tempsortedgroups.forEach((group)=>{
+        if(group.gid==pSrcGid){
+          group.files = group.files.filter((pFile)=>pFile.fid!=pFid);//Datei-Objekt aus ursprungsgruppe entnehmen, indem nach allen Dateien ausser eben dieser gefiltert wird
+        }
+      })
+      tempsortedgroups.forEach((group)=>{
+        if(group.gid==pDestGid){//Passende Zielgruppe finden
+          group.files.push(tempfile); //Wenn Zielgruppe gefunden, dann Datei an Files-Array der Gruppe anhängen
+        }
+      })
+    }
+
+    this.setState({
+      sortedgroups: tempsortedgroups,
+      unsortedfiles: tempunsortedfiles
+    })
   }
 
   //Nimmt alle Dateien einer neuen Gruppe und wenn ein PES File drin ist, wird ein CANVAS erzeugt. Wenn nicht, gibt sie null zurück.
@@ -127,11 +173,6 @@ class Hinzufuegen extends React.Component {
     return await convert(pesfile);
   }
 
-  getunsortedfilenames() {
-    return this.state.unsortedfiles.map((file) => file.fullname);
-  }
-
-
   turnimage(pGid) {
     
     let tempgrouplist = this.state.sortedgroups;
@@ -149,8 +190,6 @@ class Hinzufuegen extends React.Component {
      ctx.translate(-ctx.canvas.width/2, -ctx.canvas.height/2);
      ctx.drawImage(tempImage,0,0);
      ctx.restore();
-    // console.log("Hier bin ich drin");
-    // console.log(index, ctx, tempgrouplist)
      this.setState({sortedgroups: tempgrouplist});
   }
 
@@ -159,10 +198,12 @@ class Hinzufuegen extends React.Component {
     return (
       <div className="flex w-full h-full">
         <LinkeSeite
+          dropFile={this.dropFile}
           dataToRoot={this.dataToRoot}
-          filenamearray={this.getunsortedfilenames()}
+          filearray={this.state.unsortedfiles}
         />
         <RechteSeite
+          dropFile={this.dropFile}
           turnimage={this.turnimage}
           sortedgroups={this.state.sortedgroups}
           setCurrentEditingGroup={this.setCurrentEditingGroup}
@@ -181,8 +222,12 @@ class LinkeSeite extends React.Component {
       <div className="h-full w-2/6 bg-tertiary p-10 flex flex-col">
         <FileInput
           dataToRoot={this.props.dataToRoot}
-          filenamearray={this.props.filenamearray}
         />
+        <FileList 
+        filearray={this.props.filearray}           
+        dropFile={this.props.dropFile}
+        />
+        <button className="bg-green-500 transition-all hover:bg-green-800 text-white w-full h-20 rounded-xl mt-5 text-4xl">Speichern</button>
       </div>
     );
   }
@@ -226,36 +271,37 @@ class FileInput extends React.Component {
             multiple
           ></input>
         </div>
-        <FileList filenamearray={this.props.filenamearray}></FileList>
+        
       </>
     );
   }
 }
 
 class FileList extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { list: [] };
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.filenamearray !== this.props.filenamearray) {
-      let tempArray = this.props.filenamearray.map((name) => (
-        <div
-          key={name}
-          className="bg-secondary text-white rounded-xl m-5 px-2 py-4 text-xl"
-        >
-          {name}
-        </div>
-      ));
-      this.setState({ list: tempArray });
-    }
-  }
-
   render() {
+    let tempArray = this.props.filearray.map((file) => (
+      <div
+        onDragStart={(e)=>{e.dataTransfer.setData("text/plain", "3v_el*aw,"+file.fid+",0" )}}
+        key={file.fid}
+        className="bg-secondary text-white rounded-xl m-5 px-2 py-4 text-xl cursor-move"
+        draggable
+      >
+        {file.fullname}
+      </div>
+    ));
     return (
-      <div className="bg-quarternary rounded-xl flex-1 mt-5">
-        {this.state.list}
+      <div className="bg-quarternary rounded-xl flex-1 mt-5" onDragOver={(e)=>{e.stopPropagation();e.preventDefault()}} onDrop={
+        (e)=> {
+          e.preventDefault();
+          if (!e.dataTransfer.types.includes("text/plain")) return;
+          let transferdata = e.dataTransfer.getData("text/plain").split(",");
+          if (transferdata[0]!=="3v_el*aw") return;
+
+          console.log("Angekommene Parameter:",transferdata);
+          this.props.dropFile(transferdata[1], transferdata[2], "0");
+       }
+      }>
+        {tempArray}
       </div>
     );
   }
@@ -263,38 +309,19 @@ class FileList extends Component {
 
 class RechteSeite extends Component {
   render(props) {
-    //console.log("RechteSeite", this.props.sortedgroups);
-    return (
-      <div className="h-full flex-1 flex flex-col">
-        <GruppenListe
-          sortedgroups={this.props.sortedgroups}
-          turnimage={this.props.turnimage}
-          setCurrentEditingGroup={this.props.setCurrentEditingGroup}
-        />
-      </div>
-    );
-  }
-}
-
-class GruppenListe extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render(props) {
-    //console.log("Gruppenliste", this.props.sortedgroups);
     let dateigruppen = this.props.sortedgroups.map((group) => {
       return (
         <DateiGruppe
+          dropFile={this.props.dropFile}
           key={group.name}
           groupobject={group}
           turnimage={this.props.turnimage}
           setCurrentEditingGroup={this.props.setCurrentEditingGroup}
-        ></DateiGruppe>
+        />
       );
     });
     return (
-      <div className=" flex-grow p-10 overflow-y-scroll">{dateigruppen}</div>
+      <div className="h-full flex-1 p-10 overflow-y-scroll">{dateigruppen}</div>
     );
   }
 }
@@ -307,7 +334,7 @@ class DateiGruppe extends Component {
 
   render() {
     let filenames = this.props.groupobject.files.map((file) => (
-      <div className="bg-black text-white p-3 w-full rounded-xl my-2">
+      <div className="bg-black text-white p-3 w-full rounded-xl my-2 cursor-move" onDragStart={(e)=>{console.log(this.props.groupobject.gid); e.dataTransfer.setData("text/plain", "3v_el*aw,"+file.fid+","+this.props.groupobject.gid )}} draggable>
         {file.fullname}
       </div>
     ));
@@ -353,7 +380,15 @@ class DateiGruppe extends Component {
             <textarea className="border-4 border-l-0 border-gray-500 rounded-tr-xl rounded-br-xl w-full text-gray-400 resize-none" />
           </div>
         </div>
-        <div className="w-1/3 overflow-y-scroll">{filenames}</div>
+        <div className="w-1/3 overflow-y-scroll" onDragOver={(e)=>{e.stopPropagation();e.preventDefault()}} onDrop={
+          (e)=> {
+            e.preventDefault();
+            if (!e.dataTransfer.types.includes("text/plain")) return;
+            let transferdata = e.dataTransfer.getData("text/plain").split(",");
+            if (transferdata[0]!=="3v_el*aw") return;
+            this.props.dropFile(transferdata[1], transferdata[2], this.props.groupobject.gid);
+         }
+        }>{filenames}</div>
       </div>
     );
   }

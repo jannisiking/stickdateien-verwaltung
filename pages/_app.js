@@ -29,7 +29,7 @@ function MyApp({ Component, pageProps }) {
 
  function NavItem(props) {
    return(
-     <div className="flex-none mx-10">
+     <div className="flex-none mx-10 cursor-pointer">
     <Link href={props.href}><span  className="text-white font-black text-4xl">{props.children}</span></Link>
     </div>
    );
