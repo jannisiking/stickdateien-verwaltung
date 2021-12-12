@@ -10,14 +10,16 @@ const client = new MongoClient(url);
 const dbName = 'stickdateien_verwaltung';
 
 export async function getServerSideProps(context) {
-  // Use connect method to connect to the server
+  let result = [];
+  try {
+    // Use connect method to connect to the server
   await client.connect();
   console.log('Connected successfully to server');
   const db = client.db(dbName);
   const collection = db.collection('stickdateien');
 
   const findResult = await collection.find({}).toArray();
-  const result = findResult.map((entry)=>{
+  result = findResult.map((entry)=>{
 return {
       sid: entry._id.toString(),
       name: entry.name,
@@ -25,7 +27,9 @@ return {
       url: entry.url
   }
   })
-  console.log('Found documents =>', result);
+  } catch (error) {
+    console.log(error);
+  }
   return {
     props: {
       data: result
