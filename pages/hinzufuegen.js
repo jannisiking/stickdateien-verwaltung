@@ -206,37 +206,73 @@ class Hinzufuegen extends React.Component {
   }
 
   //Funktion zum Senden der Gruppen an den Server
-  store() {
+  async store() {
     let groups = this.state.sortedgroups;
+    //  let formData = new FormData();
+    //  console.log("file", groups[0].files[0].file)
+    //  //formData.append("name", "Schalke");
+    //  formData.append("file", groups[0].files[0].file, "Dateiname");
+    //  fetch("/api/storeData",{
+    //    method: "POST",
+    //    body: formData
+    //  })
+    //  console.log("Bin aber schon hier")
+
     groups.forEach((group) => {
       let formData = new FormData();
-      for (var key in group) {
-        if (key == "imagecanvas" && group[key]!=undefined) {
-          let ctx = group[key];
+      //ERZEUGUNG BILD START
+      var imagepromise = new Promise((resolve, reject) => {
+        try {
+          let ctx = group.imagecanvas;
           let tempImage = document.createElement("img");
           tempImage.src = ctx.canvas.toDataURL();
           ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
           ctx.save();
           ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
-          let rotationFactor = (group["angle"]/90)*0.5;
+          let rotationFactor = (group["angle"] / 90) * 0.5;
           ctx.rotate(Math.PI * rotationFactor);
           ctx.translate(-ctx.canvas.width / 2, -ctx.canvas.height / 2);
           ctx.drawImage(tempImage, 0, 0);
           ctx.restore();
-          ctx.canvas.toBlob(function(pBlob){
-            formData.append("imageblob", pBlob);
-          })
-          
-        } else {
-          formData.append(key, group[key]);
+          ctx.canvas.toBlob((pBlob) => {
+            if (pBlob == null) {
+              throw new Error("Blob konnte nicht erstellt werden");
+            } else {
+              resolve(pBlob);
+            }
+          });
+        } catch (error) {
+          console.log(error);
+          reject(null);
         }
-      }
-      let jsonstring = JSON.stringify(groups);
-      console.log("Speichern");
-      fetch("/api/storeData", {
-        method: "POST",
-        body: formData,
       });
+      //ERZEUGUNG BILD ENDE
+
+      //RESTLICHE WERTE START
+
+      formData.append("name", group.name);
+      formData.append("tags", group.tags);
+      group.files.forEach((file) => {
+        formData.append("files", file.file);
+      });
+
+      //RESTLICHE WERTE ENDE
+
+      imagepromise
+        .then((ergebnis) => {
+          formData.append("image", ergebnis);
+          fetch("/api/storeData", {
+            method: "POST",
+            body: formData,
+          });
+        })
+        .catch(() => {
+          formData.append("image", null);
+          fetch("/api/storeData", {
+            method: "POST",
+            body: formData,
+          });
+        });
     });
   }
 
