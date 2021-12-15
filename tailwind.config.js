@@ -1,5 +1,7 @@
 module.exports = {
-  purge: [],
+  content: [
+    './pages/**/*.{js,jsx,ts,tsx,vue}'
+  ],
   darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
@@ -13,9 +15,6 @@ module.exports = {
     fontFamily: {
       'sans': ['Ubuntu', 'sans-serif']
      }
-  },
-  variants: {
-    extend: {},
   },
   plugins: [
     require('@tailwindcss/forms')

@@ -12,6 +12,4 @@ Todo: Ladeanimation bei Ladezeiten
 
 
 
-Errpr: Bild drehen wenn kein Bild vorhanden ist
-
-Error:Bild zu schnell drehen (Bild verschwindet)
+Fehler: File-Symbole in ein Textfeld ziehen -> IDs und Preambel erscheinen

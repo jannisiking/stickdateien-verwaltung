@@ -303,7 +303,7 @@ class LinkeSeite extends React.Component {
   }
   render() {
     return (
-      <div className="h-full w-2/6 bg-tertiary p-10 flex flex-col">
+      <div className="h-full w-2/6 bg-white bg-opacity-50 p-10 flex flex-col shadow-lg">
         <FileInput dataToRoot={this.props.dataToRoot} />
         <FileList
           filearray={this.props.filearray}
@@ -346,11 +346,11 @@ class FileInput extends React.Component {
     return (
       <>
         <div className="relative h-1/3 w-full flex-none">
-          <div className="pointer-events-none h-full w-full bg-tertiary border-dotted border-8 absolute flex items-center justify-center">
+          <div className="pointer-events-none h-full w-full bg-gray-200 rounded-xl absolute flex items-center justify-center">
             <div className="text-8xl text-white">+</div>
           </div>
           <input
-            className="w-full h-full"
+            className="w-full h-full cursor-pointer p-5"
             type="file"
             onInput={this.file_Handler_input}
             onDrop={this.file_Handler_drop}
@@ -379,7 +379,7 @@ class FileList extends Component {
     ));
     return (
       <div
-        className="bg-quarternary rounded-xl flex-1 mt-5"
+        className="rounded-xl flex-1 mt-5 custom-shadow-inner"
         onDragOver={(e) => {
           e.stopPropagation();
           e.preventDefault();
@@ -449,7 +449,7 @@ class DateiGruppe extends Component {
   render() {
     let filenames = this.props.groupobject.files.map((file) => (
       <div
-        className="bg-black text-white p-3 w-full rounded-xl my-2 cursor-move"
+        className="bg-black text-white p-3 w-full box-border rounded-xl cursor-move mb-2 break-all"
         onDragStart={(e) => {
           console.log(this.props.groupobject.gid);
           e.dataTransfer.setData(
@@ -463,7 +463,7 @@ class DateiGruppe extends Component {
       </div>
     ));
     return (
-      <div className=" h-80 flex-grow bg-gray-400 shadow-lg transition-all duration-200 my-5 hover:shadow-2xl rounded-md p-5 flex justify-between">
+      <div className=" h-80 flex-grow bg-white bg-opacity-50 shadow-lg transition-all duration-200 my-5 hover:shadow-2xl rounded-md p-5 flex justify-between">
         <div className="relative h-full w-72 bg-white rounded-xl">
           <button
             className="absolute rounded-md bg-black m-2 z-10"
@@ -510,7 +510,7 @@ class DateiGruppe extends Component {
           </div>
         </div>
         <div
-          className="w-1/3 overflow-y-scroll"
+          className="w-1/3 overflow-y-scroll custom-shadow-inner rounded-xl hide-scrollbar p-2"
           onDragOver={(e) => {
             e.stopPropagation();
             e.preventDefault();
