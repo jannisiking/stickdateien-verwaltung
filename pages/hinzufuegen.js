@@ -303,7 +303,7 @@ class LinkeSeite extends React.Component {
   }
   render() {
     return (
-      <div className="h-full w-2/6 bg-white bg-opacity-50 p-10 flex flex-col shadow-lg">
+      <div className="h-full w-2/6 bg-white bg-opacity-50 p-10 flex flex-col shadow-lg max-w-[400px]">
         <FileInput dataToRoot={this.props.dataToRoot} />
         <FileList
           filearray={this.props.filearray}
@@ -449,7 +449,7 @@ class DateiGruppe extends Component {
   render() {
     let filenames = this.props.groupobject.files.map((file) => (
       <div
-        className="bg-black text-white p-3 w-full box-border rounded-xl cursor-move mb-2 break-all"
+        className="bg-secondary text-white p-3 w-full box-border rounded-xl cursor-move mb-2 break-all"
         onDragStart={(e) => {
           console.log(this.props.groupobject.gid);
           e.dataTransfer.setData(
@@ -486,7 +486,7 @@ class DateiGruppe extends Component {
             ref={this.referance}
           />
         </div>
-        <div className="w-1/3 mx-2 text-white text-2xl flex flex-col justify-between">
+        <div className="w-1/3 mx-2 text-gray-500 text-2xl flex flex-col justify-between">
           <div className="my-2 flex flex-nowrap">
             <div className="border-4 border-gray-500 rounded-tl-xl rounded-bl-xl w-32">
               Name

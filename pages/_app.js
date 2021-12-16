@@ -11,7 +11,7 @@ function MyApp({ Component, pageProps }) {
         <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet"/> 
       </Head>
         <Navbar></Navbar>
-        <div className="pt-20 h-screen bg-gradient-to-bl from-purple-400 via-white to-fuchsia-300">
+        <div className="pt-20 h-screen bg-gradient-to-br from-pink-200 to-pink-100">
         <Component {...pageProps}/>
         </div>
     </>
@@ -20,7 +20,7 @@ function MyApp({ Component, pageProps }) {
 
  function Navbar() {
    return (
-     <nav class="w-full h-20 bg-fuchsia-700 fixed flex justify-center items-center">
+     <nav class="w-full h-20 bg-pink-500 fixed flex justify-center items-center">
          <NavItem href="/">Startseite</NavItem>
          <NavItem href="/hinzufuegen">Hinzufügen</NavItem>
      </nav>

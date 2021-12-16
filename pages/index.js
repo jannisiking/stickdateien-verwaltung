@@ -72,16 +72,17 @@ function Kachel(props) {
 
 function Sidebar(props) {
   return (
-    <div className="flex-none h-full w-80 p-5 bg-tertiary">
-      <form className="my-5">
-        <input type="text" className="rounded-md text-xl" />
+    <div className="flex-none h-full w-80 p-5 bg-white bg-opacity-50 shadow-lg">
+      <form className="flex flex-col h-full justify-center">
+        <div className="w-full flex">
+        <input type="text" className="rounded-md text-xl w-full" />
         <button
           type="submit"
           class="bg-sky-300 p-1 text-white rounded-md transition hover:bg-sky-400"
         >
           Suche
         </button>
-
+        </div>
         <div className="bg-gray-200 py-3 my-5 rounded-xl px-5">
           <Farbfeld tailwindfarbe="bg-blue-500" />
           <Farbfeld tailwindfarbe="bg-yellow-300" />
