@@ -39,3 +39,6 @@ yarn-error.log*
 
 #public files
 /public/images
+
+#generated files
+/styles/output.css

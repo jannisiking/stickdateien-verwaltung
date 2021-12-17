@@ -208,15 +208,6 @@ class Hinzufuegen extends React.Component {
   //Funktion zum Senden der Gruppen an den Server
   async store() {
     let groups = this.state.sortedgroups;
-    //  let formData = new FormData();
-    //  console.log("file", groups[0].files[0].file)
-    //  //formData.append("name", "Schalke");
-    //  formData.append("file", groups[0].files[0].file, "Dateiname");
-    //  fetch("/api/storeData",{
-    //    method: "POST",
-    //    body: formData
-    //  })
-    //  console.log("Bin aber schon hier")
 
     groups.forEach((group) => {
       let formData = new FormData();
@@ -238,7 +229,7 @@ class Hinzufuegen extends React.Component {
             if (pBlob == null) {
               throw new Error("Blob konnte nicht erstellt werden");
             } else {
-              resolve(pBlob);
+              resolve(new File([pBlob], "image.png"));
             }
           });
         } catch (error) {
@@ -260,14 +251,13 @@ class Hinzufuegen extends React.Component {
 
       imagepromise
         .then((ergebnis) => {
-          formData.append("image", ergebnis);
+          formData.append("files", ergebnis);
           fetch("/api/storeData", {
             method: "POST",
             body: formData,
           });
         })
         .catch(() => {
-          formData.append("image", null);
           fetch("/api/storeData", {
             method: "POST",
             body: formData,
