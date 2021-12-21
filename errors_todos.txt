@@ -13,3 +13,12 @@ Todo: Ladeanimation bei Ladezeiten
 
 
 Fehler: File-Symbole in ein Textfeld ziehen -> IDs und Preambel erscheinen
+
+
+
+Todos:
+Dateien aus Ordnern extrahieren (80%)
+Einzelne Dateien zu Gruppe machen (15%)
+Dateien löschen in Hinzufügen-maske (5%)
+
+Bilder von Hand hinzufügen

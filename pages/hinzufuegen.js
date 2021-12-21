@@ -88,6 +88,7 @@ class Hinzufuegen extends React.Component {
       if (typeof unsortedfilestemp[x] != "undefined") {
         let filename = unsortedfilestemp[x].name;
         let filefullname = unsortedfilestemp[x].fullname;
+        //Alle Dateien für die neue Gruppe finden, die den gleichen Namenstamm haben
         let tempnewgroupfiles = unsortedfilestemp.filter(function (file) {
           let result = false;
           if (file.name == filename && file.fullname != filefullname) {
@@ -95,7 +96,9 @@ class Hinzufuegen extends React.Component {
           }
           return result;
         });
+        //Neue Gruppe erstellen 
         if (tempnewgroupfiles.length != 0 && tempnewgroupfiles != "undefined") {
+          //Die Datei des Index noch zur Gruppe hinzufügen
           tempnewgroupfiles.push(unsortedfilestemp[x]);
           tempgidcount++;
           arrayofnewgroups.push({
@@ -322,6 +325,8 @@ class FileInput extends React.Component {
     console.log("INPUT", e);
     e.preventDefault();
     var filearray = Object.values(this.inputRef.current.files);
+    console.log(filearray);
+    console.log(this.inputRef.current.files);
     this.props.dataToRoot(filearray);
   }
 
@@ -345,6 +350,8 @@ class FileInput extends React.Component {
             onInput={this.file_Handler_input}
             onDrop={this.file_Handler_drop}
             ref={this.inputRef}
+            webkitdirectory="true" 
+            directory="true" 
             multiple
           ></input>
         </div>
@@ -369,7 +376,7 @@ class FileList extends Component {
     ));
     return (
       <div
-        className="rounded-xl flex-1 mt-5 custom-shadow-inner"
+        className="rounded-xl flex-1 mt-5 custom-shadow-inner overflow-y-scroll hide-scrollbar"
         onDragOver={(e) => {
           e.stopPropagation();
           e.preventDefault();
