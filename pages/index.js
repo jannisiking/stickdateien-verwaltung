@@ -21,10 +21,10 @@ export async function getServerSideProps(context) {
   const findResult = await collection.find({}).toArray();
   result = findResult.map((entry)=>{
 return {
-      sid: entry._id.toString(),
-      name: entry.name,
-      autor: entry.autor,
-      url: entry.url
+      sid: entry.id,
+      name: (entry.name != undefined) ? entry.name : "",
+      autor: (entry.autor != undefined) ? entry.autor : "",
+      url: (entry.url != undefined) ? entry.url : ""
   }
   })
   } catch (error) {
@@ -54,7 +54,7 @@ function Grid(props) {
     <Kachel sid={zeile.sid}></Kachel>
   ));
   return (
-    <div className="overflow-y-scroll flex flex-wrap justify-around">
+    <div className="overflow-y-scroll flex flex-wrap justify-around w-full">
       {listitems}
     </div>
   );
@@ -64,7 +64,7 @@ function Kachel(props) {
   return (
     <a href="https://google.com">
       <div className="flex-none m-10 w-80 h-80 shadow-lg transition-all duration-200 hover:shadow-2xl rounded-md">
-      <Image src={"/images/" + props.sid + ".jpg"} layout="responsive" width="200" height="200"   objectFit="contain"/>
+      <Image src={`/files/${props.sid}/image.png`} layout="responsive" width="200" height="200"   objectFit="contain"/>
       </div>
     </a>
   );

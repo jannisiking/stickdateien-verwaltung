@@ -35,10 +35,9 @@ yarn-error.log*
 
 #lokale Dateien
 /local/
-/filestorage/
 
 #public files
 /public/images
-
+/public/files
 #generated files
 /styles/output.css

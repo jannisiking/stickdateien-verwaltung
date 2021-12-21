@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 const { MongoClient } = require("mongodb");
 const formidable = require("formidable");
-
+const sanitizer = require("sanitizer");
 // Connection URL
 const url = "mongodb://homeserver:32785";
 const client = new MongoClient(url);
@@ -11,37 +11,47 @@ const client = new MongoClient(url);
 const dbName = "stickdateien_verwaltung";
 
 export default async function handler(req, res) {
+  //Connect to the Database
   await client.connect();
   const db = client.db(dbName);
   const collection = db.collection("stickdateien");
-//   const temp = await collection.find().sort({_id:-1}).limit(1).toArray();
-// const maxid = temp[0]._id.toHexString();
-//   console.log(maxid);
-  const id = Math.round(Math.random() * 1000);
-  const dir = path.join(__dirname, `../../../../filestorage/${id}`);
-  fs.mkdirSync(dir);
+  const storedir = path.join(__dirname + "/../../../../public/files/");
+  //Ordnernamen (Nummern) auslesen und höchste Nummer finden
+  let foldernamearray = fs.readdirSync(storedir);
+  foldernamearray = foldernamearray.map((name)=>{
+    if(parseInt(name)!=NaN){
+      return parseInt(name);
+    }
+  })
+  let newid = Math.max(...foldernamearray) +1;
+  //Pfad und zugehörigen Ordner erstellen
+  const newfolderpath = path.join(storedir+`/${newid}`);
+  fs.mkdirSync(newfolderpath);
+  //Formidable Optionen einstellen
   const form = formidable({
     multiples: true,
-    uploadDir: dir,
+    uploadDir: newfolderpath,
     keepExtensions: true,
     filename: (name, ext) => {
       if (name == "image") {
         return `image${ext}`;
       } else {
-        return `${id}${ext}`;
+        return `${newid}${ext}`;
       }
-    },
+    }
   });
   form.parse(req, (err, fields, files) => {
-    if (err) {
+    if(err){
       console.log(err);
-      res.status(500).send();
-    } else {
-      collection.insertOne({_id: {
-                              $oid:"000000000000000000000001"
-                            },
-                          name: "Schalke"});
+      return;
+    }
+    try {
+      collection.insertOne({id: `${newid}`,
+      name: sanitizer.sanitize(fields.name),
+      tags: sanitizer.sanitize(fields.tags).split(" ")})
       res.status(200).send();
+    } catch (error) {
+      res.status(500).send();
     }
   });
 }
