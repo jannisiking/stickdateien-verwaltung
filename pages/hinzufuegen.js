@@ -285,10 +285,12 @@ class Hinzufuegen extends React.Component {
       //ERZEUGUNG BILD START
       var imagepromise = new Promise((resolve, reject) => {
         try {
-          let ctx = group.imageurl;
+          let ctx = document.createElement("canvas").getContext("2d");
+          ctx.canvas.height = "800";
+          ctx.canvas.width = "800";
           let tempImage = document.createElement("img");
-          tempImage.src = ctx.canvas.toDataURL();
-          ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+          tempImage.src = group.imageurl;
+          //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
           ctx.save();
           ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
           let rotationFactor = (group["angle"] / 90) * 0.5;
@@ -335,6 +337,7 @@ class Hinzufuegen extends React.Component {
           });
         });
     });
+    alert("Alle Daten erfolreich gesendet!");
   }
 
   render() {
