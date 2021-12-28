@@ -78,7 +78,7 @@ function Sidebar(props) {
         <input type="text" className="rounded-md text-xl w-full" />
         <button
           type="submit"
-          class="bg-sky-300 p-1 text-white rounded-md transition hover:bg-sky-400"
+          className="bg-sky-300 p-1 text-white rounded-md transition hover:bg-sky-400"
         >
           Suche
         </button>

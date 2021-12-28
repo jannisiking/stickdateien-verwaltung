@@ -22,3 +22,5 @@ Einzelne Dateien zu Gruppe machen (15%)
 Dateien löschen in Hinzufügen-maske (5%)
 
 Bilder von Hand hinzufügen
+
+Wenn PES Files im nachhinein eingefügt werden soll daraus auch noch automatisch ein Bild generiert werden

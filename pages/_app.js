@@ -20,7 +20,7 @@ function MyApp({ Component, pageProps }) {
 
  function Navbar() {
    return (
-     <nav class="w-full h-20 bg-pink-500 fixed flex justify-center items-center">
+     <nav className="w-full h-20 bg-pink-500 fixed flex justify-center items-center">
          <NavItem href="/">Startseite</NavItem>
          <NavItem href="/hinzufuegen">Hinzufügen</NavItem>
      </nav>

@@ -1,28 +1,70 @@
 import React, { Component } from "react";
-import Image from "next/image";
-import { convert } from "../pestopng";
 
 class Hinzufuegen extends React.Component {
   constructor(props) {
     super(props);
     this.dataToRoot = this.dataToRoot.bind(this);
-    this.initialCanvasFromPes = this.initialCanvasFromPes.bind(this);
+    this.setImageURL = this.setImageURL.bind(this);
     this.turnimage = this.turnimage.bind(this);
     this.dropFile = this.dropFile.bind(this);
     this.store = this.store.bind(this);
     this.saveTextInput = this.saveTextInput.bind(this);
+    
     this.state = {
       sortedgroups: [], //ein Array an Gruppen-Objekten. diese Objekte enthalten die Metadaten plus ein Array der eigentlichen Dateien
       unsortedfiles: [], //beninhaltet die Dateien in der linken Spalte, die noch nicht zugeordnet sind
       unsortedfilenames: [],
       gidcount: 0,
       filecount: 0,
+      pesworker: null,
+      pngworker: null
     };
   }
+
+  componentDidMount() {
+    const temppngworker = new Worker("js/pngtourl.js", {type: "module"});
+    temppngworker.onmessage = (e) => {
+      this.setState((state, props) => {
+        return {
+          sortedgroups: state.sortedgroups.map((group) => {
+            if (group.gid == e.data[1]) {
+              group.imageurl = e.data[0];
+            }
+            return group;
+          }),
+        };
+      });
+    };
+    const temppesworker = new Worker("js/pestopng.js");
+    temppesworker.onmessage = (e) => {
+      console.log("Pesworker onmessage: ", e.data)
+      this.setState((state, props) => {
+        return {
+          sortedgroups: state.sortedgroups.map((group) => {
+            if (group.gid == e.data[1]) {
+
+              group.imageurl = e.data[0];
+            }
+            return group;
+          }),
+        };
+      });
+    };
+    this.setState({pesworker: temppesworker,
+                    pngworker: temppngworker});
+  }
+
+  componentWillUnmount(){
+    this.state.pesworker.terminate();
+    this.state.pngworker.terminate();
+    this.setState({pesworker: null, pngworker: null});
+  }
+
   //Folgende Funktion wird beim einfügen neuer Dateien ausgeführt
   //ZIEL: Neue Dateien einsortieren in gruppen und unsortiert
   async dataToRoot(data) {
     let tempfilecount = this.state.filecount;
+    console.log("Start erstellen der File-Objekte: ", Date.now());
     let newdata = data.map((file) => {
       tempfilecount++;
       let fileendung = file.name.split(".").reverse()[0];
@@ -37,12 +79,14 @@ class Hinzufuegen extends React.Component {
         file: file,
       };
     });
+    console.log("Ende erstellen der File-Objekte: ", Date.now());
     let einsortiert = [];
     let unsortedfilestemp = this.state.unsortedfiles;
     let sortedgroupstemp = this.state.sortedgroups;
     unsortedfilestemp = unsortedfilestemp.concat(newdata);
 
     //Dateien in Gruppen einordnen
+    console.log("Start Dateien in Gruppen einsortieren: ", Date.now());
 
     unsortedfilestemp.forEach((unsortedfileobject, i) => {
       let hinzugefuegt = false;
@@ -74,6 +118,7 @@ class Hinzufuegen extends React.Component {
         //dann aus unsortiertem array löschen
       }
     });
+    console.log("Ende Dateien in Gruppen einsortieren: ", Date.now());
 
     //die einsortierten Dateien aus der unsortierten Liste herausnehmen:
 
@@ -96,7 +141,7 @@ class Hinzufuegen extends React.Component {
           }
           return result;
         });
-        //Neue Gruppe erstellen 
+        //Neue Gruppe erstellen
         if (tempnewgroupfiles.length != 0 && tempnewgroupfiles != "undefined") {
           //Die Datei des Index noch zur Gruppe hinzufügen
           tempnewgroupfiles.push(unsortedfilestemp[x]);
@@ -105,7 +150,7 @@ class Hinzufuegen extends React.Component {
             gid: tempgidcount,
             name: tempnewgroupfiles[0].name,
             files: tempnewgroupfiles,
-            imagecanvas: await this.initialCanvasFromPes(tempnewgroupfiles),
+            imageurl: "",
             angle: 0,
             tags: [],
           });
@@ -115,11 +160,15 @@ class Hinzufuegen extends React.Component {
         );
       }
     }
+
+
     this.setState({
       gidcount: tempgidcount,
       filecount: tempfilecount,
       sortedgroups: this.state.sortedgroups.concat(arrayofnewgroups),
       unsortedfiles: unsortedfilestemp,
+    }, ()=>{
+      arrayofnewgroups.forEach(group => this.setImageURL(group.files, group.gid))
     });
   }
 
@@ -173,20 +222,39 @@ class Hinzufuegen extends React.Component {
     });
   }
 
-  //Nimmt alle Dateien einer neuen Gruppe und wenn ein PES File drin ist, wird ein CANVAS erzeugt. Wenn nicht, gibt sie null zurück.
-  async initialCanvasFromPes(pGroupFiles) {
-    let pesfile = null;
-    pGroupFiles.forEach((file) => {
+  //Nimmt alle Dateien einer neuen Gruppe und wenn ein PES File drin ist, wird ein URL-String erzeugt. Wenn nicht, gibt sie null zurück.
+  //Rückgabe erfolgt als PROMISE!!
+  async setImageURL(pGroupFiles, gid) {
+    //console.log(pGroupFiles[0].name);
+    let pngfile = pGroupFiles.find((file) => {
       if (
-        file.ending == "pes" ||
-        file.ending == "PES" ||
-        file.ending == "Pes"
+        file.ending == "jpg" ||
+        file.ending == "JPG" ||
+        file.ending == "Jpg" ||
+        file.ending == "PNG" ||
+        file.ending == "png" ||
+        file.ending == "Png"
       ) {
-        pesfile = file.file;
+        return true;
       }
     });
-    if (pesfile == null) return;
-    return await convert(pesfile);
+    if (pngfile != undefined) {
+      //bild zu URL umwandeln
+      this.state.pngworker.postMessage([pngfile.file, gid]);
+    } else {
+      let pesfile = pGroupFiles.find((file) => {
+        if (
+          file.ending == "pes" ||
+          file.ending == "PES" ||
+          file.ending == "Pes"
+        ) {
+          return true;
+        }
+      });
+      if (pesfile != null) {
+        this.state.pesworker.postMessage([pesfile.file, gid]);
+      }
+    }
   }
 
   async turnimage(pGid) {
@@ -217,7 +285,7 @@ class Hinzufuegen extends React.Component {
       //ERZEUGUNG BILD START
       var imagepromise = new Promise((resolve, reject) => {
         try {
-          let ctx = group.imagecanvas;
+          let ctx = group.imageurl;
           let tempImage = document.createElement("img");
           tempImage.src = ctx.canvas.toDataURL();
           ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -322,11 +390,9 @@ class FileInput extends React.Component {
     this.state = { filenamearray: [] };
   }
   file_Handler_input(e) {
-    console.log("INPUT", e);
     e.preventDefault();
     var filearray = Object.values(this.inputRef.current.files);
-    console.log(filearray);
-    console.log(this.inputRef.current.files);
+    console.log(Date.now());
     this.props.dataToRoot(filearray);
   }
 
@@ -350,8 +416,8 @@ class FileInput extends React.Component {
             onInput={this.file_Handler_input}
             onDrop={this.file_Handler_drop}
             ref={this.inputRef}
-            webkitdirectory="true" 
-            directory="true" 
+            webkitdirectory="true"
+            directory="true"
             multiple
           ></input>
         </div>
@@ -420,6 +486,7 @@ class RechteSeite extends Component {
 class DateiGruppe extends Component {
   constructor(props) {
     super(props);
+    this.state = { url: "" };
     this.referance = React.createRef();
     this.nameReferance = React.createRef();
     this.tagsReferance = React.createRef();
@@ -442,6 +509,8 @@ class DateiGruppe extends Component {
       this.tagsReferance.current.value
     );
   }
+
+
 
   render() {
     let filenames = this.props.groupobject.files.map((file) => (
@@ -474,11 +543,7 @@ class DateiGruppe extends Component {
           </button>
           <img
             className="object-contain w-full h-full"
-            src={
-              this.props.groupobject.imagecanvas != null
-                ? this.props.groupobject.imagecanvas.canvas.toDataURL()
-                : ""
-            }
+            src={this.props.groupobject.imageurl}
             alt=""
             ref={this.referance}
           />
