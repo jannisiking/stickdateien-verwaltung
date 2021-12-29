@@ -4,17 +4,17 @@ const { MongoClient } = require("mongodb");
 const formidable = require("formidable");
 const sanitizer = require("sanitizer");
 // Connection URL
-const url = "mongodb://homeserver:32785";
+const url = process.env.DB_URL;
 const client = new MongoClient(url);
 
 // Database Name
-const dbName = "stickdateien_verwaltung";
+const dbName = process.env.DB_NAME;
 
 export default async function handler(req, res) {
   //Connect to the Database
   await client.connect();
   const db = client.db(dbName);
-  const collection = db.collection("stickdateien");
+  const collection = db.collection(process.env.DB_COLLECTION_NAME);
   const storedir = path.join(__dirname + "/../../../../public/files/");
   //Ordnernamen (Nummern) auslesen und höchste Nummer finden
   let foldernamearray = fs.readdirSync(storedir);

@@ -3,11 +3,11 @@ const { MongoClient } = require('mongodb');
 
 
 // Connection URL
-const url = 'mongodb://homeserver:32785';
+const url = process.env.DB_URL;
 const client = new MongoClient(url);
 
 // Database Name
-const dbName = 'stickdateien_verwaltung';
+const dbName = process.env.DB_NAME;
 
 export async function getServerSideProps(context) {
   let result = [];
@@ -16,7 +16,7 @@ export async function getServerSideProps(context) {
   await client.connect();
   console.log('Connected successfully to server');
   const db = client.db(dbName);
-  const collection = db.collection('stickdateien');
+  const collection = db.collection(process.env.DB_COLLECTION_NAME);
 
   const findResult = await collection.find({}).toArray();
   result = findResult.map((entry)=>{
