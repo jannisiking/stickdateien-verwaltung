@@ -46,9 +46,11 @@ export default async function handler(req, res) {
       return;
     }
     try {
+      let tags = fields.tags.split(',');
+      tags.forEach(tag => {sanitizer.sanitize(tag)})
       collection.insertOne({id: `${newid}`,
       name: sanitizer.sanitize(fields.name),
-      tags: sanitizer.sanitize(fields.tags).split(" ")})
+      tags: tags})
       res.status(200).send();
     } catch (error) {
       res.status(500).send();

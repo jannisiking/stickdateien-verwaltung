@@ -1,5 +1,33 @@
 import React, { Component } from "react";
 
+class Workerpool {
+  constructor(path, quantity, onmessagefunction){
+    this.workers = this.createWorkerpool(path, quantity, onmessagefunction);
+    this.quantity = quantity;
+    this.path = path;
+    this.lastused = 0;
+  }
+  createWorkerpool(path, quantity, onmessagefunction){
+    let temparray = [];
+    for(let i = 0; i < quantity; i++){
+      let tempworker = new Worker(path);
+      tempworker.onmessage = onmessagefunction;
+      temparray.push(tempworker);
+    }
+   
+    return temparray;
+  }
+  
+  postingMessage(data){
+    this.workers[this.lastused].postMessage(data);
+    this.lastused = (this.lastused + 1) % this.quantity;
+  }
+
+  terminatePool(){
+    this.workers.forEach(function(worker){worker.terminate();})
+  }
+}
+
 class Hinzufuegen extends React.Component {
   constructor(props) {
     super(props);
@@ -22,8 +50,7 @@ class Hinzufuegen extends React.Component {
   }
 
   componentDidMount() {
-    const temppngworker = new Worker("js/pngtourl.js", {type: "module"});
-    temppngworker.onmessage = (e) => {
+    const temppngworker = new Workerpool("js/pngtourl.js",5,(e) => {
       this.setState((state, props) => {
         return {
           sortedgroups: state.sortedgroups.map((group) => {
@@ -34,10 +61,10 @@ class Hinzufuegen extends React.Component {
           }),
         };
       });
-    };
-    const temppesworker = new Worker("js/pestopng.js");
-    temppesworker.onmessage = (e) => {
-      console.log("Pesworker onmessage: ", e.data)
+    });
+  
+    const temppesworker = new Workerpool("js/pestopng.js",5,(e) => {
+
       this.setState((state, props) => {
         return {
           sortedgroups: state.sortedgroups.map((group) => {
@@ -49,14 +76,15 @@ class Hinzufuegen extends React.Component {
           }),
         };
       });
-    };
+    });
+    
     this.setState({pesworker: temppesworker,
                     pngworker: temppngworker});
   }
 
   componentWillUnmount(){
-    this.state.pesworker.terminate();
-    this.state.pngworker.terminate();
+    this.state.pesworker.terminatePool();
+    this.state.pngworker.terminatePool();
     this.setState({pesworker: null, pngworker: null});
   }
 
@@ -240,7 +268,7 @@ class Hinzufuegen extends React.Component {
     });
     if (pngfile != undefined) {
       //bild zu URL umwandeln
-      this.state.pngworker.postMessage([pngfile.file, gid]);
+      this.state.pngworker.postingMessage([pngfile.file, gid]);
     } else {
       let pesfile = pGroupFiles.find((file) => {
         if (
@@ -252,7 +280,7 @@ class Hinzufuegen extends React.Component {
         }
       });
       if (pesfile != null) {
-        this.state.pesworker.postMessage([pesfile.file, gid]);
+        this.state.pesworker.postingMessage([pesfile.file, gid]);
       }
     }
   }
@@ -296,7 +324,7 @@ class Hinzufuegen extends React.Component {
           let rotationFactor = (group["angle"] / 90) * 0.5;
           ctx.rotate(Math.PI * rotationFactor);
           ctx.translate(-ctx.canvas.width / 2, -ctx.canvas.height / 2);
-          ctx.drawImage(tempImage, 0, 0);
+          ctx.drawImage(tempImage, 0, 0, 800, 800); //auch noch nicht ganz richtig, erzeugt Stauchung
           ctx.restore();
           ctx.canvas.toBlob((pBlob) => {
             if (pBlob == null) {
@@ -315,6 +343,7 @@ class Hinzufuegen extends React.Component {
       //RESTLICHE WERTE START
 
       formData.append("name", group.name);
+      console.log(group.tags);
       formData.append("tags", group.tags);
       group.files.forEach((file) => {
         formData.append("files", file.file);
