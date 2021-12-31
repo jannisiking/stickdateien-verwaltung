@@ -11,10 +11,6 @@ const client = new MongoClient(url);
 const dbName = process.env.DB_NAME;
 
 export default async function handler(req, res) {
-  //Connect to the Database
-  await client.connect();
-  const db = client.db(dbName);
-  const collection = db.collection(process.env.DB_COLLECTION_NAME);
   const storedir = path.join(__dirname + "/../../../../public/files/");
   //Ordnernamen (Nummern) auslesen und höchste Nummer finden
   let foldernamearray = fs.readdirSync(storedir);
@@ -46,6 +42,9 @@ export default async function handler(req, res) {
       return;
     }
     try {
+      await client.connect();
+  const db = client.db(dbName);
+  const collection = db.collection(process.env.DB_COLLECTION_NAME);
       let tags = fields.tags.split(',');
       tags.forEach(tag => {sanitizer.sanitize(tag)})
       collection.insertOne({id: `${newid}`,
@@ -54,6 +53,8 @@ export default async function handler(req, res) {
       res.status(200).send();
     } catch (error) {
       res.status(500).send();
+    }finally{
+      client.close();
     }
   });
 }
