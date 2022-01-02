@@ -857,10 +857,6 @@ select {
   border-width: 4px;
 }
 
-.border-8 {
-  border-width: 8px;
-}
-
 .border-l-0 {
   border-left-width: 0px;
 }
@@ -935,19 +931,9 @@ select {
   background-color: rgb(236 72 153 / var(--tw-bg-opacity));
 }
 
-.bg-gray-300 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(209 213 219 / var(--tw-bg-opacity));
-}
-
 .bg-gray-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(243 244 246 / var(--tw-bg-opacity));
-}
-
-.bg-gray-500 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(107 114 128 / var(--tw-bg-opacity));
 }
 
 .bg-opacity-50 {

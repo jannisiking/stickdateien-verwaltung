@@ -12,7 +12,7 @@ export async function getServerSideProps(context) {
     await client.connect();
     const db = client.db(process.env.DB_NAME);
     const collection = db.collection(process.env.DB_COLLECTION_NAME);
-    var document = await collection.findOne(
+    var document = await collection.findOne( //Da die Daten per JSON mitgegeben werden, können keine Pending-Promises mitgegeben werden. Er muss awaited werden
       { id: gid },
       { projection: { _id: 0, name: 1, tags: 1 } }
     );
@@ -41,6 +41,8 @@ class Details extends React.Component {
 
   render() {
     console.log(this.props);
+    let tagstring = ""; 
+    this.props.data.document.tags.forEach(tag=>tagstring+=tag);
     return (
       <div className="w-full h-full flex  flex-wrap">
         <div className="h-full w-2/5 flex flex-col justify-between p-5 box-border">
@@ -68,19 +70,19 @@ class Details extends React.Component {
         </div>
         <div className="flex-1 h-full w-1/2 flex flex-col">
           <div name="image" className=" bg-gray-200">
-            <form>
+            <form> 
               <label>
                 Name
-                <input value="Name"></input>
+                <input defaultValue={this.props.data.document.name}></input>
               </label>
               <br />
               <label>
-                <textarea></textarea>
+                <textarea defaultValue={tagstring}></textarea>
               </label>
             </form>
           </div>
           <div
-            name="image"
+            name="Filelist"
             className="flex-1 overflow-y-scroll p-5 bg-gray-100"
           >
             <Filelist />
@@ -90,6 +92,7 @@ class Details extends React.Component {
     );
   }
 }
+
 
 class Filelist extends React.Component {
   render() {
