@@ -1,11 +1,15 @@
 import React, { Component } from "react";
 import Image from "next/image";
+import path from "path";
+import fs from "fs";
 const { MongoClient } = require("mongodb");
 
 const client = new MongoClient(process.env.DB_URL);
 
 export async function getServerSideProps(context) {
   const gid = context.params.details;
+  const filedir = path.join(__dirname + "/../../../../public/files/"+gid+"/");
+  let filenamearray = [];
   console.log(gid);
   //Name und Tags -> Datenbankabfrage
   try {
@@ -16,18 +20,18 @@ export async function getServerSideProps(context) {
       { id: gid },
       { projection: { _id: 0, name: 1, tags: 1 } }
     );
-    console.log(document);
+  filenamearray = fs.readdirSync(filedir).filter(name=> name!="image.png");
   } catch (error) {
     console.log(error);
   } finally {
-    //client.close();  //Erst beenden wennPromise fullfilled ist!!
+   // client.close();  //Erst beenden wennPromise fullfilled ist!!
   }
   return {
     props: {
       data: {
         gid: gid,
         document: document,
-        filenames: [],
+        filenames: filenamearray,
       },
     }, // will be passed to the page component as props
   };
@@ -37,12 +41,15 @@ export async function getServerSideProps(context) {
 class Details extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {filenames: [...this.props.data.filenames]}
   }
 
   render() {
     console.log(this.props);
     let tagstring = ""; 
-    this.props.data.document.tags.forEach(tag=>tagstring+=tag);
+    this.props.data.document.tags.forEach(tag=>tagstring+= tag+" ");
+    console.log(this.state.filenames)
+    let filecomponents = this.state.filenames.map(filename=> <a href={"/files/"+this.props.data.gid+"/"+filename} download><div className="bg-secondary text-white p-3 box-border rounded-xl cursor-pointer mb-2 break-all">{filename}</div></a>)
     return (
       <div className="w-full h-full flex  flex-wrap">
         <div className="h-full w-2/5 flex flex-col justify-between p-5 box-border">
@@ -68,7 +75,7 @@ class Details extends React.Component {
         </button>
           </div>
         </div>
-        <div className="flex-1 h-full w-1/2 flex flex-col">
+        <div className="flex-1 h-full w-1/2 flex flex-col p-5">
           <div name="image" className=" bg-gray-200">
             <form> 
               <label>
@@ -81,12 +88,9 @@ class Details extends React.Component {
               </label>
             </form>
           </div>
-          <div
-            name="Filelist"
-            className="flex-1 overflow-y-scroll p-5 bg-gray-100"
-          >
-            <Filelist />
-          </div>
+          <div className="flex-1 overflow-y-scroll custom-shadow-inner rounded-xl hide-scrollbar p-2">
+            {filecomponents}
+           </div>
         </div>
       </div>
     );
@@ -94,12 +98,5 @@ class Details extends React.Component {
 }
 
 
-class Filelist extends React.Component {
-  render() {
-    return (
-      <div className="w-full overflow-y-scroll custom-shadow-inner rounded-xl hide-scrollbar p-2"></div>
-    );
-  }
-}
 
 export default Details;

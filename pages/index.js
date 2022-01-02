@@ -54,7 +54,7 @@ function Grid(props) {
 function Kachel(props) {
   return (
     <a href={"/details/"+props.gid}>
-      <div className="flex-none m-10 w-80 h-80 shadow-lg transition-all duration-200 hover:shadow-2xl rounded-md">
+      <div className="flex-none m-10 w-80 h-80 bg-white shadow-lg transition-all duration-200 hover:shadow-2xl rounded-lg p-2">
         <Image
           src={`/files/${props.gid}/image.png`}
           layout="responsive"

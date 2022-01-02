@@ -11,7 +11,7 @@ function MyApp({ Component, pageProps }) {
         <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet"/> 
       </Head>
         <Navbar></Navbar>
-        <div className="pt-20 h-screen bg-gradient-to-br from-pink-200 to-pink-100">
+        <div className="pt-20 h-screen bg-fuchsia-100">
         <Component {...pageProps}/>
         </div>
     </>
