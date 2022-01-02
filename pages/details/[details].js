@@ -52,10 +52,18 @@ class Details extends React.Component {
             quality="100"
           ></Image>
           </div>
-          <div name="Buttons" className="flex-0 h-56 bg-gray-300">
-            <button>Speichern</button>
-            <br></br>
-            <button>Ohne speichern zurück</button>
+          <div name="Buttons" className="flex-0 h-56">
+          <button
+          className="bg-green-500 transition-all hover:bg-green-800 text-white w-full h-20 rounded-xl mt-5 text-4xl"
+        >
+          Speichern
+        </button>
+           
+        <button
+          className=" border-gray-500 border-4 transition-all hover:bg-gray-500 hover:text-white text-gray-500 w-full h-20 rounded-xl mt-5 text-4xl"
+        >
+          Ohne Speichern zurück
+        </button>
           </div>
         </div>
         <div className="flex-1 h-full w-1/2 flex flex-col">
