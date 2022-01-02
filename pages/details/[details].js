@@ -67,12 +67,13 @@ class Details extends React.Component {
         >
           Speichern
         </button>
-           
+           <a href="/">
         <button
           className=" border-gray-500 border-4 transition-all hover:bg-gray-500 hover:text-white text-gray-500 w-full h-20 rounded-xl mt-5 text-4xl"
         >
           Ohne Speichern zurück
         </button>
+          </a>
           </div>
         </div>
         <div className="flex-1 h-full w-1/2 flex flex-col p-5">

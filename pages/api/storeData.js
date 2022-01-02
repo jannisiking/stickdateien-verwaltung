@@ -11,15 +11,23 @@ const client = new MongoClient(url);
 const dbName = process.env.DB_NAME;
 
 export default async function handler(req, res) {
+  await client.connect();
+  const db = client.db(dbName);
+  const collection = db.collection(process.env.DB_COLLECTION_NAME);
   const storedir = path.join(__dirname + "/../../../../public/files/");
   //Ordnernamen (Nummern) auslesen und höchste Nummer finden
   let foldernamearray = fs.readdirSync(storedir);
   foldernamearray = foldernamearray.map((name)=>{
-    if(parseInt(name)!=NaN){
+    if(!isNaN(parseInt(name))){
       return parseInt(name);
     }
   })
-  let newid = Math.max(...foldernamearray) +1;
+  let newid = 1;
+  console.log(foldernamearray);
+  if(foldernamearray.length!=0){ 
+    newid = Math.max(...foldernamearray) +1;
+  }
+  
   //Pfad und zugehörigen Ordner erstellen
   const newfolderpath = path.join(storedir+`/${newid}`);
   fs.mkdirSync(newfolderpath);
@@ -32,7 +40,7 @@ export default async function handler(req, res) {
       if (name == "image") {
         return `image${ext}`;
       } else {
-        return `${newid}${ext}`;
+        return `${name}${ext}`;
       }
     }
   });
@@ -42,9 +50,6 @@ export default async function handler(req, res) {
       return;
     }
     try {
-      await client.connect();
-  const db = client.db(dbName);
-  const collection = db.collection(process.env.DB_COLLECTION_NAME);
       let tags = fields.tags.split(',');
       tags.forEach(tag => {sanitizer.sanitize(tag)})
       collection.insertOne({id: `${newid}`,
@@ -54,7 +59,7 @@ export default async function handler(req, res) {
     } catch (error) {
       res.status(500).send();
     }finally{
-      client.close();
+      //client.close();
     }
   });
 }

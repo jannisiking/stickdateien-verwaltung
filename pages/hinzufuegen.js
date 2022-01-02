@@ -324,7 +324,12 @@ class Hinzufuegen extends React.Component {
           let rotationFactor = (group["angle"] / 90) * 0.5;
           ctx.rotate(Math.PI * rotationFactor);
           ctx.translate(-ctx.canvas.width / 2, -ctx.canvas.height / 2);
-          ctx.drawImage(tempImage, 0, 0, 800, 800); //auch noch nicht ganz richtig, erzeugt Stauchung
+          console.log(tempImage.width, tempImage.height);
+          if(tempImage.width>tempImage.height){
+            ctx.drawImage(tempImage, 0, 0, 800, (tempImage.height/tempImage.width)*800); 
+          } else {
+            ctx.drawImage(tempImage, 0, 0, (tempImage.width/tempImage.height)*800, 800);
+          }
           ctx.restore();
           ctx.canvas.toBlob((pBlob) => {
             if (pBlob == null) {
