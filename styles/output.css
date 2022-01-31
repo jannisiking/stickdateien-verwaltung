@@ -620,6 +620,10 @@ select {
   pointer-events: none;
 }
 
+.invisible {
+  visibility: hidden;
+}
+
 .fixed {
   position: fixed;
 }
@@ -719,6 +723,10 @@ select {
 
 .h-56 {
   height: 14rem;
+}
+
+.h-32 {
+  height: 8rem;
 }
 
 .w-full {
@@ -940,6 +948,10 @@ select {
   background-color: rgb(236 72 153 / var(--tw-bg-opacity));
 }
 
+.bg-inherit {
+  background-color: inherit;
+}
+
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
@@ -991,6 +1003,10 @@ select {
 
 .pt-20 {
   padding-top: 5rem;
+}
+
+.align-middle {
+  vertical-align: middle;
 }
 
 .text-4xl {
@@ -1083,6 +1099,10 @@ select {
   /* Firefox */
 }
 
+.editimage-parent:hover .editimage-child{
+  visibility: visible;
+}
+
 .hover\:bg-green-800:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(22 101 52 / var(--tw-bg-opacity));
@@ -1107,4 +1127,13 @@ select {
   --tw-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   --tw-shadow-colored: 0 25px 50px -12px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-} 
+}
+
+.group:hover .group-hover\:visible {
+  visibility: visible;
+}
+
+.group:hover .group-hover\:blur-sm {
+  --tw-blur: blur(4px);
+  filter: var(--tw-filter);
+}

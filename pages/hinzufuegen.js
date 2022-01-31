@@ -560,6 +560,7 @@ class DateiGruppe extends Component {
             "3v_el*aw," + file.fid + "," + this.props.groupobject.gid
           );
         }}
+        key={file.fullname}
         draggable
       >
         {file.fullname}

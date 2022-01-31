@@ -35,6 +35,7 @@ yarn-error.log*
 
 #lokale Dateien
 /local/
+/errors_todos.txt
 
 #public files
 /public/images

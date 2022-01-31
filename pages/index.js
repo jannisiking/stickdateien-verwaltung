@@ -43,7 +43,7 @@ function Startseite(props) {
 }
 
 function Grid(props) {
-  var listitems = props.data.map((zeile) => <Kachel gid={zeile.gid}></Kachel>);
+  var listitems = props.data.map((zeile) => <Kachel gid={zeile.gid} key={zeile.gid}></Kachel>);
   return (
     <div className="overflow-y-scroll flex flex-wrap justify-around w-full">
       {listitems}
