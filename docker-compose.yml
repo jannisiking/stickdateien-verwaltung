@@ -1,0 +1,10 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - stickdateien_verwaltung_file_data:/public/files
+volumes:
+  stickdateien_verwaltung_file_data: {}
