@@ -5,7 +5,7 @@ import '../styles/output.css'
 function MyApp({ Component, pageProps }) {
   return (
     <>
-      <Head>
+      <Head> //KOmmentar zum testen
         <link rel="preconnect" href="https://fonts.googleapis.com"/>
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin/>
         <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet"/> 
